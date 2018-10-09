@@ -215,6 +215,12 @@ public class RNPushNotificationHelper {
             String group = bundle.getString("group");
             if (group != null) {
                 notification.setGroup(group);
+
+                Boolean isSummary = bundle.getBoolean("groupSummary", false);
+
+                if (isSummary) {
+                    notification.setGroupSummary(true);
+                }
             }
 
             notification.setContentText(bundle.getString("message"));

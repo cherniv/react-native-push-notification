@@ -23,9 +23,12 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.Random;
 
+import java.util.HashMap;
+
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.LOG_TAG;
 
 public class RNPushNotificationListenerService extends FirebaseMessagingService {
+    public static HashMap<String,String> groupSummaryIds = new HashMap<String,String>();
 
     @Override
     public void onMessageReceived(RemoteMessage message) {
@@ -127,15 +130,39 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
         if (bundle.getString("contentAvailable", "false").equalsIgnoreCase("true")) {
             jsDelivery.notifyRemoteFetch(bundle);
         }
-        if (isForeground) {
-            Log.v(LOG_TAG, "App is in foreground , not sendNotification: " + bundle);
-        } else {
+        //if (isForeground) {
+        //    Log.v(LOG_TAG, "App is in foreground , not sendNotification: " + bundle);
+        //} else {
             Log.v(LOG_TAG, "sendNotification: " + bundle);
 
             Application applicationContext = (Application) context.getApplicationContext();
             RNPushNotificationHelper pushNotificationHelper = new RNPushNotificationHelper(applicationContext);
             pushNotificationHelper.sendToNotificationCentre(bundle);
-        }
+
+            String group = bundle.getString("group");
+            if (group != null) {
+                Bundle b = new Bundle(bundle); // setGroupSummary
+                b.putBoolean("foreground", false);
+                b.putBoolean("userInteraction", false);
+                b.putBoolean("groupSummary", true);
+                b.putString("group", group);
+                b.putString("message", "Messages");
+
+                String id;
+                String value = groupSummaryIds.getOrDefault(group, null);
+                if (value != null) {
+                    id = value;
+                } else {
+                    Random randomNumberGenerator = new Random(System.currentTimeMillis());
+                    id = String.valueOf(randomNumberGenerator.nextInt());
+                    groupSummaryIds.put(group, id);
+                }
+                b.putString("id", id);
+                pushNotificationHelper.sendToNotificationCentre(b);
+
+            }
+            
+        //}
     }
 
     private boolean isApplicationInForeground() {
