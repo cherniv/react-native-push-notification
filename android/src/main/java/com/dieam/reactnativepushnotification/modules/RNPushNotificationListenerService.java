@@ -127,12 +127,15 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
         if (bundle.getString("contentAvailable", "false").equalsIgnoreCase("true")) {
             jsDelivery.notifyRemoteFetch(bundle);
         }
+        if (isForeground) {
+            Log.v(LOG_TAG, "App is in foreground , not sendNotification: " + bundle);
+        } else {
+            Log.v(LOG_TAG, "sendNotification: " + bundle);
 
-        Log.v(LOG_TAG, "sendNotification: " + bundle);
-
-        Application applicationContext = (Application) context.getApplicationContext();
-        RNPushNotificationHelper pushNotificationHelper = new RNPushNotificationHelper(applicationContext);
-        pushNotificationHelper.sendToNotificationCentre(bundle);
+            Application applicationContext = (Application) context.getApplicationContext();
+            RNPushNotificationHelper pushNotificationHelper = new RNPushNotificationHelper(applicationContext);
+            pushNotificationHelper.sendToNotificationCentre(bundle);
+        }
     }
 
     private boolean isApplicationInForeground() {
